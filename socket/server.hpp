@@ -7,6 +7,8 @@ namespace server
     class ServerHTTP
     {
     private:
+        int sock = 0;
+
     public:
         ServerHTTP(int port_);
         ~ServerHTTP();
