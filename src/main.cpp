@@ -4,7 +4,7 @@
 int main()
 {
     int port;
-    std::cout << "Portul pe care vrei sa deschizi serverul: " << "\n";
+    std::cout << "Portul pe care vrei sa deschizi serverul: ";
     std::cin >> port;
     server::ServerHTTP serverHTTP(port);
 }
