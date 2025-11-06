@@ -1,10 +1,26 @@
 #include "server.hpp"
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
+
+// Metode private
+
+bool server::ServerHTTP::testForProblems(int var)
+{
+    bool succes;
+    if (var < 0)
+    {
+        succes = false;
+        throw std::runtime_error("Eroare la crearea socketului!\n");
+        std::cout << strerror(errno) << " " << "Cod eroare: " << errno;
+        return succes;
+    }
+    else
+    {
+        succes = true;
+        return succes;
+    }
+}
 
 void server::ServerHTTP::writeSocketAddress(sockaddr_in &serveradd, int port_)
 {
@@ -13,32 +29,47 @@ void server::ServerHTTP::writeSocketAddress(sockaddr_in &serveradd, int port_)
     serveradd.sin_port = htons(port_);
 }
 
-server::ServerHTTP::ServerHTTP(int port_)
+// Constructor si destructor
+
+server::ServerHTTP::ServerHTTP(int port_, int conexiuniMaxime_)
 {
+    conexiuniMaxime = conexiuniMaxime_;
     sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sock < 0) // inlocuieste 0 cu IP_PROTOTCP
-    {
-        throw std::runtime_error("Eroare la crearea socketului!\n");
-        std::cout << strerror(errno) << " " << "Cod eroare: " << errno;
-    }
-    else
+    if (testForProblems(sock))
     {
         std::cout << "Socket creat cu succes!" << "\n";
         std::cout << sock << "\n";
-        // afiseaza numarul socketului
     }
     writeSocketAddress(serveradd, port_);
-    if (bind(sock, (sockaddr *)&serveradd, sizeof(serveradd)) < 0)
-    {
-        throw std::runtime_error("Eroare la bind! \n");
-        std::cout << strerror(errno) << " " << "Cod eroare: " << errno;
-    }
-    else
+    memset(&serveradd.sin_zero, 0, sizeof(serveradd.sin_zero)); // <---- E practica buna sa setezi sin_zero la 0 totusi.
+}
+
+server::ServerHTTP::~ServerHTTP()
+{
+}
+
+// Metode publice
+
+void server::ServerHTTP::namingTheSocket()
+{
+    if (testForProblems(bind(sock, (sockaddr *)&serveradd, sizeof(serveradd))))
     {
         std::cout << "Succes la bind!\n";
     }
 }
 
-server::ServerHTTP::~ServerHTTP()
+void server::ServerHTTP::setSocketForListening()
 {
+    if (testForProblems(listen(sock, conexiuniMaxime)))
+    {
+        std::cout << "Serverul asculta! \n";
+    }
+}
+
+void server::ServerHTTP::acceptingConnections()
+{
+    if (testForProblems(accept(sock, NULL, NULL)))
+    {
+        std::cout << "Serverul asteapta o conexiune \n";
+    }
 }

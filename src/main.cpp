@@ -3,8 +3,16 @@
 
 int main()
 {
-    int port;
+    int port, conexiuniMaxime;
     std::cout << "Portul pe care vrei sa deschizi serverul: ";
     std::cin >> port;
-    server::ServerHTTP serverHTTP(port);
+    std::cout << "Cate conexiuni vrei sa accepte serverul? ";
+    std::cin >> conexiuniMaxime;
+    server::ServerHTTP serverHTTP(port, conexiuniMaxime);
+    serverHTTP.namingTheSocket();
+    serverHTTP.setSocketForListening();
+    while (1)
+    {
+        serverHTTP.acceptingConnections();
+    }
 }
