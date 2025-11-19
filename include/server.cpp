@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
+#include <unistd.h>
 
 // Metode private
 
@@ -53,6 +54,7 @@ viorel::Server::Server(int port_, int conexiuniMaxime_)
 
 viorel::Server::~Server()
 {
+    close(sock);
 }
 
 // Metode publice

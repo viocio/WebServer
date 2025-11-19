@@ -16,8 +16,15 @@ int main()
     {
         int socketClient = serverHTTP.acceptingConnections();
         char buffer[2048];
-        recv(socketClient, buffer, sizeof(buffer), 0);
-        std::string requestString(buffer);
+        std::string requestString;
+        while (1)
+        {
+            recv(socketClient, buffer, sizeof(buffer), 0);
+
+            requestString += buffer;
+            // parsaser buffer in timp real
+            // \r\n\r\n
+        }
         HTTPresponse response = httpHandler(requestString);
     }
 }
