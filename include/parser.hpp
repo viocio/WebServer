@@ -36,4 +36,7 @@ struct HTTPresponse
 
 // functii
 
+HTTPrequest httpRequestParser(std::string requestString);
+HTTPresponse httpHandler(std::string requestString);
+
 #endif

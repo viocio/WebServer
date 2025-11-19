@@ -15,5 +15,9 @@ int main()
     while (1)
     {
         int socketClient = serverHTTP.acceptingConnections();
+        char buffer[2048];
+        recv(socketClient, buffer, sizeof(buffer), 0);
+        std::string requestString(buffer);
+        HTTPresponse response = httpHandler(requestString);
     }
 }
