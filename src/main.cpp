@@ -1,5 +1,6 @@
 #include <iostream>
 #include "server.hpp"
+#include "parser.hpp"
 
 int main()
 {
@@ -8,11 +9,11 @@ int main()
     std::cin >> port;
     std::cout << "Cate conexiuni vrei sa accepte serverul? ";
     std::cin >> conexiuniMaxime;
-    server::ServerHTTP serverHTTP(port, conexiuniMaxime);
+    viorel::Server serverHTTP(port, conexiuniMaxime);
     serverHTTP.namingTheSocket();
     serverHTTP.setSocketForListening();
     while (1)
     {
-        serverHTTP.acceptingConnections();
+        int socketClient = serverHTTP.acceptingConnections();
     }
 }

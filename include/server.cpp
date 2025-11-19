@@ -5,13 +5,13 @@
 
 // Metode private
 
-bool server::ServerHTTP::testForProblems(int var)
+bool viorel::Server::noProblems(int var)
 {
     bool succes;
     if (var < 0)
     {
         succes = false;
-        throw std::runtime_error("Eroare la crearea socketului!\n");
+        throw std::runtime_error("Eroare!\n");
         std::cout << strerror(errno) << " " << "Cod eroare: " << errno;
         return succes;
     }
@@ -22,20 +22,27 @@ bool server::ServerHTTP::testForProblems(int var)
     }
 }
 
-void server::ServerHTTP::writeSocketAddress(sockaddr_in &serveradd, int port_)
+void viorel::Server::writeSocketAddress(sockaddr_in &vioreladd, int port_)
 {
-    serveradd.sin_family = AF_INET;
-    inet_pton(AF_INET, "172.16.1.96", &serveradd.sin_addr.s_addr);
-    serveradd.sin_port = htons(port_);
+    vioreladd.sin_family = AF_INET;
+    inet_pton(AF_INET, "172.16.1.96", &vioreladd.sin_addr.s_addr);
+    vioreladd.sin_port = htons(port_);
 }
 
 // Constructor si destructor
 
-server::ServerHTTP::ServerHTTP(int port_, int conexiuniMaxime_)
+viorel::Server::Server(int port_, int conexiuniMaxime_)
 {
-    conexiuniMaxime = conexiuniMaxime_;
+    if (conexiuniMaxime_ > 0)
+    {
+        conexiuniMaxime = conexiuniMaxime_;
+    }
+    else
+    {
+        conexiuniMaxime = SOMAXCONN;
+    }
     sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (testForProblems(sock))
+    if (noProblems(sock))
     {
         std::cout << "Socket creat cu succes!" << "\n";
         std::cout << sock << "\n";
@@ -44,32 +51,34 @@ server::ServerHTTP::ServerHTTP(int port_, int conexiuniMaxime_)
     memset(&serveradd.sin_zero, 0, sizeof(serveradd.sin_zero)); // <---- E practica buna sa setezi sin_zero la 0 totusi.
 }
 
-server::ServerHTTP::~ServerHTTP()
+viorel::Server::~Server()
 {
 }
 
 // Metode publice
 
-void server::ServerHTTP::namingTheSocket()
+void viorel::Server::namingTheSocket()
 {
-    if (testForProblems(bind(sock, (sockaddr *)&serveradd, sizeof(serveradd))))
+    if (noProblems(bind(sock, (sockaddr *)&serveradd, sizeof(serveradd))))
     {
         std::cout << "Succes la bind!\n";
     }
 }
 
-void server::ServerHTTP::setSocketForListening()
+void viorel::Server::setSocketForListening()
 {
-    if (testForProblems(listen(sock, conexiuniMaxime)))
+    if (noProblems(listen(sock, conexiuniMaxime)))
     {
         std::cout << "Serverul asculta! \n";
     }
 }
 
-void server::ServerHTTP::acceptingConnections()
+int viorel::Server::acceptingConnections()
 {
-    if (testForProblems(accept(sock, NULL, NULL)))
+    int clientAcceptat = accept(sock, NULL, NULL);
+    if (noProblems(clientAcceptat))
     {
-        std::cout << "Serverul asteapta o conexiune \n";
+        std::cout << "Serverul a acceptat o conexiune \n";
     }
+    return clientAcceptat;
 }

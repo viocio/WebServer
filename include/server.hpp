@@ -5,9 +5,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-namespace server
+namespace viorel
 {
-    class ServerHTTP
+    class Server
     {
     private:
         int sock = 0;
@@ -16,12 +16,12 @@ namespace server
         int conexiuniMaxime = 0;
 
     public:
-        ServerHTTP(int port_, int conexiuniMaxime_);
-        ~ServerHTTP();
-        bool testForProblems(int var); // verificam daca functiile de socket au avut succes
+        Server(int port_, int conexiuniMaxime_);
+        ~Server();
+        bool noProblems(int var); // verificam daca functiile de socket au avut succes
         void namingTheSocket();
         void setSocketForListening();
-        void acceptingConnections();
+        int acceptingConnections();
     };
 }
 #endif
