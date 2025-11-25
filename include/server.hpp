@@ -22,6 +22,7 @@ namespace viorel
         void namingTheSocket();
         void setSocketForListening();
         int acceptingConnections();
+        std::string receivingRequest(int socketClient_);
     };
 }
 #endif

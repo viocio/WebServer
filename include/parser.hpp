@@ -38,6 +38,13 @@ struct HTTPresponse
 // functii
 
 HTTPrequest httpRequestParser(std::string requestString);
-HTTPresponse httpHandler(std::string requestString);
+HTTPresponse httpHandler(std::string requestString, std::string pathRelativ);
+HTTPresponse responseConstructor(const HTTPrequest request, std::string pathRelativ);
+HTTPresponse resolveGET(const HTTPrequest request, std::string pathRelativ);
+HTTPresponse resolvePOST(const HTTPrequest request, std::string pathRelativ);
+HTTPresponse resolveDELETE(const HTTPrequest request, std::string pathRelativ);
+HTTPresponse notImplemented();
+HTTPresponse notFound();
 
+std::string setContentType(std::string path);
 #endif

@@ -5,26 +5,21 @@
 int main()
 {
     int port, conexiuniMaxime;
+    std::string pathRelativ;
     std::cout << "Portul pe care vrei sa deschizi serverul: ";
     std::cin >> port;
     std::cout << "Cate conexiuni vrei sa accepte serverul? ";
     std::cin >> conexiuniMaxime;
+    std::cout << "Path relativ pentru site: ";
+    std::cin >> pathRelativ;
     viorel::Server serverHTTP(port, conexiuniMaxime);
     serverHTTP.namingTheSocket();
     serverHTTP.setSocketForListening();
     while (1)
     {
         int socketClient = serverHTTP.acceptingConnections();
-        char buffer[2048];
-        std::string requestString;
-        while (1)
-        {
-            recv(socketClient, buffer, sizeof(buffer), 0);
-
-            requestString += buffer;
-            // parsaser buffer in timp real
-            // \r\n\r\n
-        }
-        HTTPresponse response = httpHandler(requestString);
+        std::string requestString = serverHTTP.receivingRequest(socketClient); // recv() will be called in this function
+        HTTPresponse response = httpHandler(requestString, pathRelativ);
+        // serverHTTP.sendData();
     }
 }

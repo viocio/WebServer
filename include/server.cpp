@@ -84,3 +84,44 @@ int viorel::Server::acceptingConnections()
     }
     return clientAcceptat;
 }
+
+std::string viorel::Server::receivingRequest(int socketClient_)
+{
+    std::string request;
+    // TODO: make sure the request sent to httpHandler() is full
+    char buffer[2048];
+    int numberBytes;
+    bool headersDone = false;
+    int contentLengthNumber = 0;
+    while ((numberBytes = recv(socketClient_, buffer, sizeof(buffer), 0)) > 0)
+    {
+        request.append(buffer, numberBytes);
+        if (request.find("\r\n\r\n") != std::string::npos)
+        {
+            break;
+        }
+    }
+    if (request.find("Content-Length") != std::string::npos)
+    {
+        std::string contentLength = request.substr(request.find("Content-Length: "));
+        std::string contentLengthEnd = contentLength.substr(0, contentLength.find("\r\n"));
+        contentLength = contentLengthEnd.substr(contentLength.find(": ") + 2);
+        contentLength = contentLength.substr(0, contentLength.find("\r\n"));
+        contentLengthNumber = stoi(contentLength);
+    }
+    if (contentLengthNumber == 0)
+    {
+        return request;
+    }
+    size_t alreadyReceivedBody = request.find("\r\n\r\n") + 4;
+    int remainingBody = contentLengthNumber - (request.size() - alreadyReceivedBody);
+    while (remainingBody > 0)
+    {
+        numberBytes = recv(socketClient_, buffer, sizeof(buffer), 0);
+        if (numberBytes <= 0)
+            break;
+        request.append(buffer, numberBytes);
+        remainingBody -= numberBytes;
+    }
+    return request;
+}
