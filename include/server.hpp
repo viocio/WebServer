@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string>
 
 namespace viorel
 {
@@ -23,6 +24,7 @@ namespace viorel
         void setSocketForListening();
         int acceptingConnections();
         std::string receivingRequest(int socketClient_);
+        void sendData(std::string response, int socketClient);
     };
 }
 #endif

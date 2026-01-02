@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
+#include <string>
 
 // Metode private
 
@@ -23,11 +24,11 @@ bool viorel::Server::noProblems(int var)
     }
 }
 
-void viorel::Server::writeSocketAddress(sockaddr_in &vioreladd, int port_)
+void viorel::Server::writeSocketAddress(sockaddr_in &serveradd, int port_)
 {
-    vioreladd.sin_family = AF_INET;
-    inet_pton(AF_INET, "172.16.1.96", &vioreladd.sin_addr.s_addr);
-    vioreladd.sin_port = htons(port_);
+    serveradd.sin_family = AF_INET;
+    inet_pton(AF_INET, "172.16.1.96", &serveradd.sin_addr.s_addr);
+    serveradd.sin_port = htons(port_);
 }
 
 // Constructor si destructor
@@ -85,13 +86,25 @@ int viorel::Server::acceptingConnections()
     return clientAcceptat;
 }
 
+void viorel::Server::sendData(std::string response, int socketClient_)
+{
+    int numberOfBytesSent = 0;
+    int totalNumberOfBytes = response.size();
+    char const *responseToSend = response.c_str();
+    do
+    {
+        numberOfBytesSent = send(socketClient_, responseToSend, totalNumberOfBytes, 0);
+        responseToSend += numberOfBytesSent;
+        totalNumberOfBytes -= numberOfBytesSent;
+    } while (totalNumberOfBytes > 0);
+}
+
 std::string viorel::Server::receivingRequest(int socketClient_)
 {
     std::string request;
     // TODO: make sure the request sent to httpHandler() is full
     char buffer[2048];
     int numberBytes;
-    bool headersDone = false;
     int contentLengthNumber = 0;
     while ((numberBytes = recv(socketClient_, buffer, sizeof(buffer), 0)) > 0)
     {
@@ -101,27 +114,37 @@ std::string viorel::Server::receivingRequest(int socketClient_)
             break;
         }
     }
+    if (numberBytes < 0)
+    {
+        if (errno == EAGAIN || errno == EWOULDBLOCK)
+        {
+            return "";
+        }
+    }
     if (request.find("Content-Length") != std::string::npos)
     {
+        // NOTE: Content-Length parsing is strict (expects "Content-Length: ")
+        // Acceptable for LAN usage; relax if needed later.
+
         std::string contentLength = request.substr(request.find("Content-Length: "));
         std::string contentLengthEnd = contentLength.substr(0, contentLength.find("\r\n"));
         contentLength = contentLengthEnd.substr(contentLength.find(": ") + 2);
-        contentLength = contentLength.substr(0, contentLength.find("\r\n"));
         contentLengthNumber = stoi(contentLength);
     }
     if (contentLengthNumber == 0)
     {
         return request;
     }
-    size_t alreadyReceivedBody = request.find("\r\n\r\n") + 4;
-    int remainingBody = contentLengthNumber - (request.size() - alreadyReceivedBody);
-    while (remainingBody > 0)
+    size_t bodyStart = request.find("\r\n\r\n") + 4;
+    size_t alreadyReceivedBody = request.size() - bodyStart;
+    int remainingBody = contentLengthNumber - alreadyReceivedBody;
+    do
     {
         numberBytes = recv(socketClient_, buffer, sizeof(buffer), 0);
         if (numberBytes <= 0)
             break;
         request.append(buffer, numberBytes);
         remainingBody -= numberBytes;
-    }
+    } while (remainingBody > 0);
     return request;
 }

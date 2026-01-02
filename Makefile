@@ -1,3 +1,3 @@
 build:
-	g++ src/main include/parser.cpp include/server.cpp -Iinclude -o main
+	g++ src/main.cpp include/parser.cpp include/server.cpp -Iinclude -o main
 

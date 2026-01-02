@@ -35,16 +35,26 @@ struct HTTPresponse
     std::string body;
 };
 
-// functii
+// functie de intrare
 
-HTTPrequest httpRequestParser(std::string requestString);
-HTTPresponse httpHandler(std::string requestString, std::string pathRelativ);
+std::string httpHandler(std::string requestString, std::string pathRelativ);
+
+// metoda care ruteaza catre raspunsuri
+
 HTTPresponse responseConstructor(const HTTPrequest request, std::string pathRelativ);
+
+// functii care intorc raspunsuri
+
 HTTPresponse resolveGET(const HTTPrequest request, std::string pathRelativ);
 HTTPresponse resolvePOST(const HTTPrequest request, std::string pathRelativ);
 HTTPresponse resolveDELETE(const HTTPrequest request, std::string pathRelativ);
 HTTPresponse notImplemented();
 HTTPresponse notFound();
 
+// functii suport
+
 std::string setContentType(std::string path);
+std::string rtos(HTTPresponse response);
+HTTPrequest httpRequestParser(std::string requestString);
+
 #endif
