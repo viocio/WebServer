@@ -12,9 +12,10 @@ namespace viorel
     {
     private:
         int sock = 0;
+        int conexiuniMaxime = 0;
         sockaddr_in serveradd;
         void writeSocketAddress(sockaddr_in &serveradd, int port_);
-        int conexiuniMaxime = 0;
+        std::string extractOne(std::string &pending);
 
     public:
         Server(int port_, int conexiuniMaxime_);
@@ -23,8 +24,8 @@ namespace viorel
         void namingTheSocket();
         void setSocketForListening();
         int acceptingConnections();
-        std::string receivingRequest(int socketClient_);
-        void sendData(std::string response, int socketClient);
+        std::string receivingRequest(int socketClient_, bool &postIncomplet, std::string &pending);
+        void sendData(const std::string response, int socketClient);
     };
 }
 #endif

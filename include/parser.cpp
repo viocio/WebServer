@@ -107,6 +107,7 @@ HTTPresponse resolveDELETE(const HTTPrequest request, std::string pathRelativ)
 
 std::string httpHandler(std::string requestString, std::string pathRelativ)
 {
+
     HTTPresponse response;
     std::string responseS;
     // TODO request de parsat.
