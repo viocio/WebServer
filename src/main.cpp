@@ -11,6 +11,10 @@ void handleClient(viorel::Server &serverHTTP, int socketClient, const std::strin
     {
         bool postIncomplet = false;
         std::string requestString = serverHTTP.receivingRequest(socketClient, postIncomplet, pending); // recv() will be called in this function
+        // functia recv() este blocking, deci in interiorul lui receivingRequest executia sa va opri fie
+        // cand clientul inchide conexiunea si recv() intoarce 0, fie cand e timeout si recv() intoarce -1,
+        // fie clientul primeste ceva si recv() intoarce numarul de octeti primiti
+        // pentru -1 si 0 functia receivingRequest returneaza un empty string
         if (requestString.empty())
         {
             if (postIncomplet)

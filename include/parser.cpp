@@ -147,7 +147,7 @@ std::string setContentType(std::string path)
     }
     else if (extensie == "js")
     {
-        return "application/javascript";
+        return "text/javascript";
     }
     else
     {

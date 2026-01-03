@@ -1,4 +1,8 @@
-function changeMessage() {
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btn");
   const msg = document.getElementById("message");
-  msg.textContent = "JavaScript loaded and executed!";
-}
+
+  btn.addEventListener("click", () => {
+    msg.textContent = "JavaScript loaded and executed!";
+  });
+});

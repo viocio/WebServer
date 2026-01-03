@@ -13,8 +13,8 @@ bool viorel::Server::noProblems(int var)
     if (var < 0)
     {
         succes = false;
-        throw std::runtime_error("Eroare!\n");
         std::cout << strerror(errno) << " " << "Cod eroare: " << errno;
+        throw std::runtime_error("Eroare!\n");
         return succes;
     }
     else
@@ -27,12 +27,15 @@ bool viorel::Server::noProblems(int var)
 void viorel::Server::writeSocketAddress(sockaddr_in &serveradd, int port_)
 {
     serveradd.sin_family = AF_INET;
-    inet_pton(AF_INET, "172.16.123.11", &serveradd.sin_addr.s_addr);
+    inet_pton(AF_INET, "172.16.1.96", &serveradd.sin_addr.s_addr);
     serveradd.sin_port = htons(port_);
 }
 
 std::string viorel::Server::extractOne(std::string &pending)
 {
+    // NOTE: functia asta va strica ceea ce este in pending daca requestul are body
+    // ea este facuta exclusiv pentru GET-uri consecutive
+    // astfel nu incercati sa stergeti sau adaugati resurse pe server folosind doua sau mai multe requesturi deodata
     size_t pos = pending.find("\r\n\r\n");
     std::string request = pending.substr(0, pos + 4);
     pending = pending.substr(pos + 4);
@@ -115,6 +118,8 @@ std::string viorel::Server::receivingRequest(int socketClient_, bool &postIncomp
     }
     postIncomplet = false;
     // TODO: make sure the request sent to httpHandler() is full
+
+    // mai jos se citeste requestul pana la terminarea headerelor
     char buffer[2048];
     int numberBytes;
     size_t contentLengthNumber = 0;
@@ -126,10 +131,13 @@ std::string viorel::Server::receivingRequest(int socketClient_, bool &postIncomp
             break;
         }
     }
-    if (numberBytes <= 0)
+    if (numberBytes <= 0) // daca clientul a inchis conexiunea sau exista timeout se returneaza empty string
     {
         return "";
     }
+
+    // se verifica existenta unui body
+
     if (pending.find("Content-Length") != std::string::npos)
     {
         // NOTE: Content-Length parsing is strict (expects "Content-Length: ")
@@ -140,29 +148,30 @@ std::string viorel::Server::receivingRequest(int socketClient_, bool &postIncomp
         contentLength = contentLengthEnd.substr(contentLength.find(": ") + 2);
         contentLengthNumber = stoi(contentLength);
     }
-    if (contentLengthNumber == 0 || pending.find("Content-Length") == std::string::npos)
+    if (contentLengthNumber == 0 || pending.find("Content-Length") == std::string::npos) // daca nu exista boody se returneaza requestul
     {
-        return pending;
+        return extractOne(pending);
     }
+
     size_t bodyStart = pending.find("\r\n\r\n") + 4;
     size_t alreadyReceivedBody = pending.size() - bodyStart;
     size_t remainingBody = contentLengthNumber - alreadyReceivedBody;
 
-    if (remainingBody == 0)
+    if (remainingBody == 0) // daca exista corp si a fost primit complet, se returneaza cererea
     {
-        return pending;
+        return extractOne(pending);
     }
     do
     {
         numberBytes = recv(socketClient_, buffer, sizeof(buffer), 0);
         if (numberBytes <= 0)
         {
-            if (alreadyReceivedBody > 0)
+            if (remainingBody > 0)
                 postIncomplet = true;
             break;
         }
         pending.append(buffer, numberBytes);
         remainingBody -= numberBytes;
     } while (remainingBody > 0);
-    return pending;
+    return extractOne(pending);
 }
