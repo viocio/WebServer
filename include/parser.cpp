@@ -37,9 +37,9 @@ HTTPresponse responseConstructor(const HTTPrequest request, std::string pathRela
     if (request.requestLine.method == "GET")
         response = resolveGET(request, pathRelativ);
     else if (request.requestLine.method == "POST")
-        response = resolvePOST(request, pathRelativ);
+        response = resolvePOST(request);
     else if (request.requestLine.method == "DELETE")
-        response = resolveDELETE(request, pathRelativ);
+        response = resolveDELETE(request);
     else
         response = notImplemented();
     return response;
@@ -52,8 +52,10 @@ HTTPresponse notImplemented()
     response.statusLine.code = "501";
     response.statusLine.message = "Not Implemented";
 
-    response.headers["Content-Type"] = "text/html";
-    // response.headers["Content-Length"] = std::to_string(sizeof(fisier));
+    ///  nu o sa ma mai complic cu pagini, trimit doar codul
+
+    response.headers["Connection"] = "close";
+    response.headers["Content-Length"] = "0";
 
     return response;
 }
@@ -62,9 +64,40 @@ HTTPresponse notFound()
 {
     // Eroare 404
     HTTPresponse response;
+    response.statusLine.version = "HTTP/1.1";
+    response.statusLine.code = "404";
+    response.statusLine.message = "Not Found";
+    response.headers["Content-Length"] = "0";
+    response.headers["Connection"] = "close";
     return response;
 }
 
+/* DE implementat*/
+
+HTTPresponse badRequest()
+{
+    HTTPresponse response;
+    response.statusLine.version = "HTTP/1.1";
+    response.statusLine.code = "400";
+    response.statusLine.message = "Bad Request";
+    response.headers["Content-Length"] = "0";
+    response.headers["Connection"] = "close";
+    return response;
+}
+
+HTTPresponse internalError()
+{
+    HTTPresponse response;
+    response.statusLine.version = "HTTP/1.1";
+    response.statusLine.code = "500";
+    response.statusLine.message = "Internal Error";
+    response.headers["Content-Length"] = "0";
+    response.headers["Connection"] = "close";
+    return response;
+    return response;
+}
+
+/*    ##################        Poate mai sunt cazuri de eroare, de completat       #############*/
 HTTPresponse resolveGET(const HTTPrequest request, std::string pathRelativ)
 {
     HTTPresponse response;
@@ -93,15 +126,76 @@ HTTPresponse resolveGET(const HTTPrequest request, std::string pathRelativ)
     return response;
 }
 
-HTTPresponse resolvePOST(const HTTPrequest request, std::string pathRelativ)
+HTTPresponse resolvePOST(const HTTPrequest request)
 {
     HTTPresponse response;
+    std::string numeFisier;
+    auto it = request.headers.find("X-filename");
+    if (it != request.headers.end())
+    {
+        numeFisier = it->second;
+    }
+    else
+    {
+        if (request.requestLine.URI.size() > 1)
+            numeFisier = request.requestLine.URI.substr(1); // "/a.txt" -> "a.txt"
+    }
+    if (numeFisier.empty())
+        return badRequest();
+
+    if (numeFisier.find("..") != std::string::npos || numeFisier.find("/") != std::string::npos)
+        return badRequest();
+
+    std::string pathFisier = "site/" + numeFisier;
+    std::ofstream fisier(pathFisier, std::ios::binary);
+    if (!fisier.is_open())
+        return internalError(); // Eroare 500
+
+    fisier.write(request.body.data(), request.body.size());
+    if (!fisier)
+        return internalError();
+
+    response.statusLine.version = "HTTP/1.1";
+    response.statusLine.code = "201";
+    response.statusLine.message = "Created";
+    response.headers["Content-Length"] = "0";
+    response.headers["Connection"] = "close";
     return response;
 }
 
-HTTPresponse resolveDELETE(const HTTPrequest request, std::string pathRelativ)
+/*  #################### De implementat ######################### */
+
+HTTPresponse resolveDELETE(const HTTPrequest request)
 {
     HTTPresponse response;
+    std::string numeFisier;
+    auto it = request.headers.find("X-filename");
+    if (it != request.headers.end())
+    {
+        numeFisier = it->second;
+    }
+    else
+    {
+        if (request.requestLine.URI.size() > 1)
+            numeFisier = request.requestLine.URI.substr(1); // "/a.txt" -> "a.txt"
+    }
+    if (numeFisier.empty())
+        return badRequest();
+
+    if (numeFisier.find("..") != std::string::npos || numeFisier.find("/") != std::string::npos)
+        return badRequest();
+
+    std::string pathFisier = "site/" + numeFisier;
+    // nu verifica daca fisierul exista
+    int status = remove(pathFisier.c_str());
+    if (status == 0)
+        return internalError();
+
+    response.statusLine.version = "HTTP/1.1";
+    response.statusLine.code = "200";
+    response.statusLine.message = "OK";
+    response.headers["Content-Length"] = "0";
+    response.headers["Connection"] = "close";
     return response;
 }
 
@@ -133,6 +227,7 @@ std::string rtos(HTTPresponse response)
     return responseS;
 }
 
+/*  #################   De completetat  #################   */
 std::string setContentType(std::string path)
 {
     std::string extensie;

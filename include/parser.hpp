@@ -46,8 +46,11 @@ HTTPresponse responseConstructor(const HTTPrequest request, std::string pathRela
 // functii care intorc raspunsuri
 
 HTTPresponse resolveGET(const HTTPrequest request, std::string pathRelativ);
-HTTPresponse resolvePOST(const HTTPrequest request, std::string pathRelativ);
-HTTPresponse resolveDELETE(const HTTPrequest request, std::string pathRelativ);
+HTTPresponse resolvePOST(const HTTPrequest request);
+HTTPresponse resolveDELETE(const HTTPrequest request);
+
+HTTPresponse badRequest();
+HTTPresponse internalError();
 HTTPresponse notImplemented();
 HTTPresponse notFound();
 
