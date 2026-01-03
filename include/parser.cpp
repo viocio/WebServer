@@ -37,9 +37,9 @@ HTTPresponse responseConstructor(const HTTPrequest request, std::string pathRela
     if (request.requestLine.method == "GET")
         response = resolveGET(request, pathRelativ);
     else if (request.requestLine.method == "POST")
-        response = resolvePOST(request);
+        response = resolvePOST(request, pathRelativ);
     else if (request.requestLine.method == "DELETE")
-        response = resolveDELETE(request);
+        response = resolveDELETE(request, pathRelativ);
     else
         response = notImplemented();
     return response;
@@ -94,7 +94,6 @@ HTTPresponse internalError()
     response.headers["Content-Length"] = "0";
     response.headers["Connection"] = "close";
     return response;
-    return response;
 }
 
 /*    ##################        Poate mai sunt cazuri de eroare, de completat       #############*/
@@ -126,7 +125,7 @@ HTTPresponse resolveGET(const HTTPrequest request, std::string pathRelativ)
     return response;
 }
 
-HTTPresponse resolvePOST(const HTTPrequest request)
+HTTPresponse resolvePOST(const HTTPrequest request, std::string pathRelativ)
 {
     HTTPresponse response;
     std::string numeFisier;
@@ -146,7 +145,7 @@ HTTPresponse resolvePOST(const HTTPrequest request)
     if (numeFisier.find("..") != std::string::npos || numeFisier.find("/") != std::string::npos)
         return badRequest();
 
-    std::string pathFisier = "site/" + numeFisier;
+    std::string pathFisier = pathRelativ + numeFisier;
     std::ofstream fisier(pathFisier, std::ios::binary);
     if (!fisier.is_open())
         return internalError(); // Eroare 500
@@ -163,9 +162,7 @@ HTTPresponse resolvePOST(const HTTPrequest request)
     return response;
 }
 
-/*  #################### De implementat ######################### */
-
-HTTPresponse resolveDELETE(const HTTPrequest request)
+HTTPresponse resolveDELETE(const HTTPrequest request, std::string pathRelativ)
 {
     HTTPresponse response;
     std::string numeFisier;
@@ -185,7 +182,7 @@ HTTPresponse resolveDELETE(const HTTPrequest request)
     if (numeFisier.find("..") != std::string::npos || numeFisier.find("/") != std::string::npos)
         return badRequest();
 
-    std::string pathFisier = "site/" + numeFisier;
+    std::string pathFisier = pathRelativ + numeFisier;
     // nu verifica daca fisierul exista
     int status = remove(pathFisier.c_str());
     if (status == 0)
