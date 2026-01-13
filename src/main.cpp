@@ -41,15 +41,17 @@ int main()
         "Connection: close\r\n"
         "Content-Length: 0\r\n"
         "\r\n";
-    std::string pathRelativ;
+    std::string pathRelativ, ip;
+    std::cout << "IP server: ";
+    std::cin >> ip;
     std::cout << "Portul pe care vrei sa deschizi serverul: ";
     std::cin >> port;
     std::cout << "Cate conexiuni vrei sa accepte serverul? ";
     std::cin >> conexiuniMaxime;
-    std::cout << "Pune / dupa path: Ex: ~/site/";
-    std::cout << "Path relativ pentru site: ";
+    std::cout << "Path relativ pentru site: " << std::endl;
+    std::cout << "Pune / dupa path: Ex: ~/site/: ";
     std::cin >> pathRelativ;
-    viorel::Server serverHTTP(port, conexiuniMaxime);
+    viorel::Server serverHTTP(port, conexiuniMaxime, ip);
     serverHTTP.namingTheSocket();
     serverHTTP.setSocketForListening();
     while (true)

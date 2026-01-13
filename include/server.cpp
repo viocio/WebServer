@@ -24,10 +24,10 @@ bool viorel::Server::noProblems(int var)
     }
 }
 
-void viorel::Server::writeSocketAddress(sockaddr_in &serveradd, int port_)
+void viorel::Server::writeSocketAddress(sockaddr_in &serveradd, int port_, std::string ip)
 {
     serveradd.sin_family = AF_INET;
-    inet_pton(AF_INET, "172.16.1.96", &serveradd.sin_addr.s_addr);
+    inet_pton(AF_INET, ip.c_str(), &serveradd.sin_addr.s_addr);
     serveradd.sin_port = htons(port_);
 }
 
@@ -44,7 +44,7 @@ std::string viorel::Server::extractOne(std::string &pending)
 
 // Constructor si destructor
 
-viorel::Server::Server(int port_, int conexiuniMaxime_)
+viorel::Server::Server(int port_, int conexiuniMaxime_, std::string ipServer)
 {
     if (conexiuniMaxime_ > 0)
     {
@@ -60,7 +60,7 @@ viorel::Server::Server(int port_, int conexiuniMaxime_)
         std::cout << "Socket creat cu succes!" << "\n";
         std::cout << sock << "\n";
     }
-    writeSocketAddress(serveradd, port_);
+    writeSocketAddress(serveradd, port_, ipServer);
     memset(&serveradd.sin_zero, 0, sizeof(serveradd.sin_zero)); // <---- E practica buna sa setezi sin_zero la 0 totusi.
 }
 

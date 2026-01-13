@@ -14,11 +14,12 @@ namespace viorel
         int sock = 0;
         int conexiuniMaxime = 0;
         sockaddr_in serveradd;
-        void writeSocketAddress(sockaddr_in &serveradd, int port_);
+        std::string ipServer;
+        void writeSocketAddress(sockaddr_in &serveradd, int port_, std::string ip);
         std::string extractOne(std::string &pending);
 
     public:
-        Server(int port_, int conexiuniMaxime_);
+        Server(int port_, int conexiuniMaxime_, std::string ipServer);
         ~Server();
         bool noProblems(int var); // verificam daca functiile de socket au avut succes
         void namingTheSocket();
