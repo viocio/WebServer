@@ -1,75 +1,126 @@
 # 🚀 WebServer – Custom HTTP Server in C++
 
-A lightweight web server written **from scratch in C++**, featuring:
+A lightweight **HTTP/1.1 web server written from scratch in C++**, built using low-level system calls and designed for learning and experimentation.
 
-- a custom HTTP/1.1 parser
-- POSIX sockets
-- multithreading
-- serving static files
-- simple and modular architecture
+This project exposes what really happens **under the hood** when a client communicates with a server using HTTP.
 
-This project is designed to help you understand what really happens under the hood when a client sends an HTTP request to a server.
+---
+
+## ✨ Features
+
+- Custom **HTTP/1.1 request parser**
+- POSIX **TCP sockets**
+- **Thread-per-client** concurrency model
+- Support for **keep-alive** (multiple requests per connection)
+- **Static file serving** (HTML, CSS, JS, etc.)
+- **POST upload support**
+- **DELETE support**
+- Configurable **server IP, port, and working directory**
+- Proper handling of HTTP status codes (200, 400, 404, 408, 500, 501)
+- Simple and modular architecture
 
 ---
 
 ## 📦 How to Use
 
 ### 1️⃣ Clone the repository
-
 ```bash
 git clone https://github.com/viocio/WebServer
 cd WebServer
 ```
 
 ### 2️⃣ Build the project
-
 ```bash
 make
 ```
 
 ### 3️⃣ Run the server
-
 ```bash
 ./main
 ```
 
-### 4️⃣ Provide the required parameters
+---
 
-When prompted, enter:
+## ⚙️ Runtime Configuration (Prompted at Startup)
 
-- the **port** the server should listen on
-- the **maximum number of simultaneous clients**
-- the **absolute path** to the directory where your website files are located
+When starting the server, you will be prompted to enter:
+
+- **IP address** the server should listen on  
+  (previously hard-coded, now configurable at runtime)
+- **Port**
+- **Maximum number of simultaneous clients**
+- **Absolute or relative path** to the directory used as server root (`pathRelativ`)
+
+Example:
+```
+IP: 192.168.1.42
+Port: 8080
+Max clients: 10
+Website path: ./site/
+```
+
+The `pathRelativ` directory is used for:
+- serving files via **GET**
+- storing uploaded files via **POST**
+- deleting files via **DELETE**
 
 ---
 
 ## 🌐 Accessing Your Website
 
-Once the server is running, you can access your website from any device in the same LAN:
+Once the server is running, access it from any device in the same LAN:
 
 ```
 http://IP_ADDRESS:PORT
 ```
 
-Where:
-
-- `IP_ADDRESS` = the IP address of the machine running the server
-- `PORT` = the port you selected at startup
-
 Example:
-
 ```
 http://192.168.1.42:8080
 ```
 
 ---
 
-## 📚 Full Documentation & Video Series
+## 📤 HTTP Method Support
 
-A complete, step-by-step documented implementation is available here (in romanian):
+### ✅ GET
+- Serves static files from `pathRelativ`
+- Supports HTML, CSS, JS, images, etc.
 
-🎥 YouTube playlist:  
-https://www.youtube.com/playlist?list=PLQLV8c-gyK0D5ML5rgiVpiWh6SSq50mpI
+### ✅ POST (File Upload)
+Two supported variants:
+
+1️⃣ Filename in URL  
+```
+POST /file.txt
+```
+
+2️⃣ Filename via custom header  
+```
+X-Filename: file.txt
+```
+
+Uploaded files are saved **inside `pathRelativ`**.
+
+### ✅ DELETE
+```
+DELETE /file.txt
+```
+Deletes the specified file from `pathRelativ`.
+
+---
+
+## ⚠️ Error Handling
+
+The server properly responds with standard HTTP status codes:
+
+- **200 OK** – request successful
+- **201 Created** – file uploaded
+- **400 Bad Request** – invalid request or missing data
+- **404 Not Found** – file or resource does not exist
+- **408 Request Timeout** – incomplete POST body
+- **500 Internal Server Error** – server-side failure
+- **501 Not Implemented** – unsupported HTTP method
 
 ---
 
@@ -77,23 +128,36 @@ https://www.youtube.com/playlist?list=PLQLV8c-gyK0D5ML5rgiVpiWh6SSq50mpI
 
 - **C++**
 - **POSIX / UNIX sockets**
-- **pthread multithreading**
+- **std::thread** multithreading
 - **Custom HTTP/1.1 parsing**
-- **Static file serving**
+- **Filesystem operations**
+
+---
+
+## 📚 Documentation & Video Series
+
+A complete step-by-step documented implementation (Romanian) is available here:
+
+🎥 **YouTube playlist**  
+https://www.youtube.com/playlist?list=PLQLV8c-gyK0D5ML5rgiVpiWh6SSq50mpI
 
 ---
 
 ## 🧠 Project Purpose
 
-This project is built as a learning exercise to understand:
+This project is designed as a **learning exercise** to understand:
 
 - how TCP servers accept and manage connections
-- how to implement multithreading
-- how to parse HTTP requests manually
-- how to construct and send valid HTTP responses
-- how to serve static files from the filesystem
+- multithreading and concurrency
+- manual HTTP request parsing
+- building valid HTTP responses
+- serving and manipulating files via HTTP
 
-It is an excellent foundation for further work in networking, backend development, or cybersecurity.
+It provides a strong foundation for future work in:
+- networking
+- backend systems
+- operating systems
+- cybersecurity
 
 ---
 
